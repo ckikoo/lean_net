@@ -12,7 +12,8 @@
 #  read 和write 的注意事项
 ## write 特点
 * 写成功 err =nil  && wn == len(buf)
-* 写阻塞
+* 写阻塞 
+> 缓冲区数据满了
 *  使用deadline 来控制超时时间
 
 ## read 特点
@@ -22,3 +23,8 @@
 * 关闭 eof   (全双工, 既可以发送也可以读取)
 * 设置时间
 * deadline 
+
+# 格式化
+> newdeocde newencode io.wrier 可以直接传入conn 编码器
+> gob 二进制 传输
+
