@@ -13,19 +13,13 @@ type Pool interface {
 	Len() int
 }
 
-type ConnFactory interface {
-	Factory() (net.Conn, error)
-	Close(net.Conn) error
-	Ping(net.Conn) error
-}
-
 type PoolConfig struct {
 	MinConNum   int           // 最小
 	MaxCountNum int           //最大
 	MaxIdleNum  int           // 最多空闲
 	IdleTimeOut time.Duration // 空闲超时
-
-	Factory ConnFactory // 工厂
+	DialTimeout time.Duration //建立链接超时时间
+	Factory     ConnFactory   // 工厂
 }
 
 type IdleConn struct {
@@ -37,7 +31,7 @@ type IdleConn struct {
 
 type TcpPool struct {
 	config         *PoolConfig
-	openingConnNum int
-	idleList       chan *IdleConn
-	mu             sync.Mutex
+	openingConnNum int            // 使用的链接数量
+	idleList       chan *IdleConn // 空闲
+	mu             sync.Mutex     // 保证conn
 }
