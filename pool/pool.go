@@ -136,12 +136,28 @@ func (pool *TcpPool) Get() (any, error) {
 	}
 
 }
-func (pool *TcpPool) Put(any) error {
-	// 上锁
+func (pool *TcpPool) Put(conn any) error {
+	if conn == nil {
+		return errors.New("connect is nil")
+	}
 
-	// 2 校验
+	if pool.idleList == nil {
+		pool.config.Factory.Close(conn.(net.Conn))
+		return errors.New("pool  idleList is not exists")
+	}
 
-	// 3 返回
+	select {
+	//放回
+	case pool.idleList <- &IdleConn{
+		conn:    conn.(net.Conn),
+		putTime: time.Now(),
+	}:
+		pool.mu.Lock()
+		pool.openingConnNum--
+		pool.mu.Unlock()
+	default:
+		// 等待吧
+	}
 
 	return nil
 }
