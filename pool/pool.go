@@ -74,7 +74,7 @@ func NewTcpPool(addr string, poolConfig PoolConfig) (*TcpPool, error) {
 	// 初始化链接 --最小
 
 	for i := 0; i < pool.config.MinConNum; i++ {
-		conn, err := pool.config.Factory.Factory()
+		conn, err := pool.config.Factory.Factory(addr)
 		if err != nil {
 			// 连接处初始化失败
 			pool.Release() //初始化失败 , 但有可能部分链接成功
@@ -86,9 +86,6 @@ func NewTcpPool(addr string, poolConfig PoolConfig) (*TcpPool, error) {
 	return &pool, nil
 }
 func (pool *TcpPool) Get() (any, error) {
-	// 上锁
-	pool.mu.Lock()
-	defer pool.mu.Unlock()
 
 	// 获取
 	for {
@@ -111,10 +108,16 @@ func (pool *TcpPool) Get() (any, error) {
 				pool.config.Factory.Close(freeConn.conn)
 				continue
 			}
+			// 上锁
+			pool.mu.Lock()
+			defer pool.mu.Unlock()
+
 			pool.openingConnNum++
 			return freeConn.conn, nil
 		default: // 创建链接
 			// 是否还可以创建
+			pool.mu.Lock()
+			defer pool.mu.Unlock()
 			if pool.openingConnNum >= pool.config.MaxCountNum {
 				// return nil, errors.New("max opening connection")
 				continue
@@ -134,6 +137,12 @@ func (pool *TcpPool) Get() (any, error) {
 
 }
 func (pool *TcpPool) Put(any) error {
+	// 上锁
+
+	// 2 校验
+
+	// 3 返回
+
 	return nil
 }
 func (pool *TcpPool) Release() error {
