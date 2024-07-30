@@ -7,7 +7,7 @@ import (
 )
 
 type ConnFactory interface {
-	Factory() (net.Conn, error)
+	Factory(string) (net.Conn, error)
 	Close(net.Conn) error
 	Ping(net.Conn) error
 }
