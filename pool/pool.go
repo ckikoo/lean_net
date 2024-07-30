@@ -156,6 +156,7 @@ func (pool *TcpPool) Put(conn any) error {
 		pool.openingConnNum--
 		pool.mu.Unlock()
 	default:
+		_ = pool.config.Factory.Close(conn.(net.Conn))
 		// 等待吧
 	}
 
